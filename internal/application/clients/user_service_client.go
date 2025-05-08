@@ -23,13 +23,13 @@ func NewUserServiceClient(userServiceURL string) UserServiceClient {
 
 func (c *userServiceClient) GetUserInfo(token string) (*domain.UserInfo, error) {
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/user/info", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8001/api/v1/user/info", nil)
 	if err != nil {
 		log.Println("Error creating request:", err)
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+ token)
+	req.Header.Add("Authorization", "Bearer "+token)
 
 	client := &http.Client{}
 
@@ -38,7 +38,6 @@ func (c *userServiceClient) GetUserInfo(token string) (*domain.UserInfo, error) 
 		log.Println("Error sending request:", err)
 		return nil, err
 	}
-	
 
 	defer resp.Body.Close()
 

@@ -15,12 +15,8 @@ type productRepository struct {
 	db *gorm.DB
 }
 
-func NewProductRepository(db *gorm.DB) ProductRepository {
-	return &productRepository{db: db}
-}
+func NewProductRepository(db *gorm.DB) ProductRepository { return &productRepository{db: db} }
 
 func (r *productRepository) CreateProduct(ctx context.Context, product *domain.Product) error {
 	return r.db.WithContext(ctx).Create(product).Error
 }
-
-
