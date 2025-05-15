@@ -7,17 +7,21 @@ import (
 )
 
 type Product struct {
-	ID          int64          `json:"id" gorm:"primaryKey"`
-	Title       string         `json:"title" gorm:"not null"`
-	Description string         `json:"description"`
-	CategoryID  uint           `json:"categoryId" gorm:"not null"`
+	ID          int64          `gorm:"column:id;primaryKey"`
+	Title       string         `gorm:"column:title;not null"`
+	Description string         `gorm:"column:description"`
+	CategoryID  uint           `gorm:"column:category_id;not null"`
 	Category    Category       `json:"category" gorm:"foreignKey:CategoryID"`
-	UserID      string         `json:"userId" gorm:"not null"` 
-	Username    string         `json:"userName" gorm:"not null"` 
-	Quantity    int            `json:"quantity" gorm:"not null"`
-	Price       float64        `json:"price,omitempty"`
-	Image       string         `json:"image"`
-	CreatedAt   time.Time      `json:"createdAt"`
-	UpdatedAt   time.Time      `json:"updatedAt"`
-	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+	UserID      string         `gorm:"column:user_id;not null"`
+	Username    string         `gorm:"column:username;not null"`
+	Quantity    int            `gorm:"column:quantity;not null"`
+	Price       float64        `gorm:"column:price"`
+	Image       string         `gorm:"column:image"`
+	CreatedAt   time.Time      `gorm:"column:created_at"`
+	UpdatedAt   time.Time      `gorm:"column:updated_at"`
+	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at"`
+}
+
+func (Product) TableName() string {
+	return "products"
 }

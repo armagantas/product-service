@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 
 	domain "github.com/armagantas/ecommerce-microservice/product-service/internal/domain/models"
 )
@@ -22,8 +23,7 @@ func NewUserServiceClient(userServiceURL string) UserServiceClient {
 }
 
 func (c *userServiceClient) GetUserInfo(token string) (*domain.UserInfo, error) {
-
-	req, err := http.NewRequest("GET", "http://localhost:8001/api/v1/user/info", nil)
+	req, err := http.NewRequest("GET", c.userServiceURL+"/api/users/profile", nil)
 	if err != nil {
 		log.Println("Error creating request:", err)
 		return nil, err
@@ -46,11 +46,27 @@ func (c *userServiceClient) GetUserInfo(token string) (*domain.UserInfo, error) 
 		return nil, errors.New("error getting user info")
 	}
 
-	var userInfo domain.UserInfo
-	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
+	var response struct {
+		Success bool            `json:"success"`
+		Data    domain.UserInfo `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		log.Println("Error decoding user info:", err)
 		return nil, err
 	}
 
-	return &userInfo, nil
+	if !response.Success {
+		return nil, errors.New("user service returned unsuccessful response")
+	}
+
+	// Username yoksa email'den oluştur (eski kullanıcılar için geçici çözüm)
+	if response.Data.Username == "" && response.Data.Email != "" {
+		parts := strings.Split(response.Data.Email, "@")
+		response.Data.Username = parts[0]
+	}
+
+	log.Printf("User info retrieved: ID=%s, Username=%s", response.Data.ID, response.Data.Username)
+
+	return &response.Data, nil
 }

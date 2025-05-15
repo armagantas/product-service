@@ -10,5 +10,8 @@ func InitRouter(router fiber.Router, productController controllers.ProductContro
 	categoryRouter := router.Group("/categories")
 
 	productRouter.Post("/", productController.CreateProduct)
+	productRouter.Put("/:id", productController.UpdateProduct)
+	productRouter.Get("/", productController.GetAllProducts)
+	productRouter.Get("/:id", productController.GetProductByID)
 	categoryRouter.Post("/", categoryController.AddCategory)
 }
