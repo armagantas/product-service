@@ -14,6 +14,7 @@ type ProductController interface {
 	UpdateProduct(ctx *fiber.Ctx) error
 	GetAllProducts(ctx *fiber.Ctx) error
 	GetProductByID(ctx *fiber.Ctx) error
+	GetProductOwner(ctx *fiber.Ctx) error
 }
 
 type productController struct {
@@ -214,5 +215,51 @@ func (c *productController) GetProductByID(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"data":    product,
+	})
+}
+
+func (c *productController) GetProductOwner(ctx *fiber.Ctx) error {
+	var userInfo *domain.UserInfo
+	authHeader := ctx.Get("Authorization")
+
+	if authHeader != "" {
+		parts := strings.Split(authHeader, " ")
+		if len(parts) == 2 && parts[0] == "Bearer" {
+			token := parts[1]
+			userInfoResult, err := c.productHandler.GetUserInfo(token)
+			if err == nil {
+				userInfo = userInfoResult
+			}
+		}
+	}
+
+	if userInfo == nil {
+		userInfo = &domain.UserInfo{}
+	}
+
+	productID := ctx.Params("id")
+	if productID == "" {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Ürün ID'si gerekli",
+		})
+	}
+
+	productOwner, err := c.productHandler.GetProductOwner(ctx.Context(), *userInfo, productID)
+	if err != nil {
+		if strings.Contains(err.Error(), "bulunamadı") {
+			return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Ürün sahibi bilgisi alınırken hata oluştu: " + err.Error(),
+		})
+	}
+
+	// Sadece ürün sahibinin ID ve kullanıcı adını içeren yanıt
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"data":    productOwner,
 	})
 }

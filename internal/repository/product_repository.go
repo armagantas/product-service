@@ -57,3 +57,7 @@ func (r *productRepository) UpdateProduct(ctx context.Context, product *domain.P
 	product.UpdatedAt = time.Now()
 	return r.db.WithContext(ctx).Save(product).Error
 }
+
+func (r *productRepository) GetUserByProductId(ctx context.Context, productID int64) error {
+	return nil
+}

@@ -18,6 +18,7 @@ type ProductHandler interface {
 	GetProductByID(ctx context.Context, user domain.UserInfo, productID string) (*domain.Product, error)
 	GetUserInfo(token string) (*domain.UserInfo, error)
 	UpdateProduct(ctx context.Context, id int64, req UpdateProductRequest) error
+	GetProductOwner(ctx context.Context, user domain.UserInfo, productID string) (*domain.ProductOwner, error)
 }
 
 type productHandler struct {
@@ -147,4 +148,29 @@ func (h *productHandler) GetProductByID(ctx context.Context, user domain.UserInf
 	log.Printf("GetProductByID: Ürün bulundu: ID=%d, Title=%s", id, product.Title)
 
 	return product, nil
+}
+
+func (h *productHandler) GetProductOwner(ctx context.Context, user domain.UserInfo, productID string) (*domain.ProductOwner, error) {
+	// String olan product ID'yi int64'e çevirelim
+	id, err := strconv.ParseInt(productID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("geçersiz ürün ID formatı: %v", err)
+	}
+
+	product, err := h.productRepository.GetProductByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("ürün bilgisi alınırken hata oluştu: %v", err)
+	}
+
+	if product == nil {
+		return nil, fmt.Errorf("ürün bulunamadı: ID=%d", id)
+	}
+
+	// Loglama ekleyelim
+	log.Printf("GetProductOwner: Ürün sahibi bulundu: ID=%s, Username=%s", product.UserID, product.Username)
+
+	return &domain.ProductOwner{
+		UserID:   product.UserID,
+		Username: product.Username,
+	}, nil
 }

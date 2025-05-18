@@ -13,5 +13,6 @@ func InitRouter(router fiber.Router, productController controllers.ProductContro
 	productRouter.Put("/:id", productController.UpdateProduct)
 	productRouter.Get("/", productController.GetAllProducts)
 	productRouter.Get("/:id", productController.GetProductByID)
+	productRouter.Get("/:id/owner", productController.GetProductOwner)
 	categoryRouter.Post("/", categoryController.AddCategory)
 }
